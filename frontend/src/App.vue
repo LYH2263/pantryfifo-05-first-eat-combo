@@ -10,6 +10,7 @@
         <router-link to="/layer/lower">下层</router-link>
         <router-link to="/inbound">入库</router-link>
         <router-link to="/consume">消费</router-link>
+        <router-link to="/combo">先吃组合</router-link>
         <router-link to="/settings">设置</router-link>
       </nav>
       <router-view />
@@ -17,8 +18,15 @@
   </div>
 </template>
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { api } from './api'
 const alerts = ref([])
-onMounted(async () => { try { alerts.value = await api('/alerts') } catch { alerts.value = [] } })
+const route = useRoute()
+async function loadAlerts() {
+  // top bar is always recomputed live: new warn_days / post-combo stock apply immediately
+  try { alerts.value = await api('/alerts') } catch { alerts.value = [] }
+}
+onMounted(loadAlerts)
+watch(() => route.fullPath, loadAlerts)  // recompute whenever the user moves between pages
 </script>
