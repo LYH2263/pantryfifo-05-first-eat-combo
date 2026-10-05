@@ -4,9 +4,13 @@ export async function api(path, opts = {}) {
     ...opts,
   })
   if (!r.ok) {
+    let body = null
     let detail = r.statusText
-    try { const j = await r.json(); detail = j.detail || JSON.stringify(j) } catch {}
-    throw new Error(typeof detail === 'string' ? detail : JSON.stringify(detail))
+    try { body = await r.json(); detail = body.detail || JSON.stringify(body) } catch {}
+    const e = new Error(typeof detail === 'string' ? detail : JSON.stringify(detail))
+    e.status = r.status
+    e.body = body
+    throw e
   }
   if (r.status === 204) return null
   return r.json()
